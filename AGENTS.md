@@ -12,7 +12,9 @@ Lark CLI (`lark-cli`) is a command-line tool for interacting with the Lark Open 
 - **Bot** (`--as bot`) — app-level identity, uses `App ID` + `App Secret`
 - **User** (`--as user`) — user-level identity, requires browser-based OAuth login
 
-> **Default rule**: Always use `--as bot` for all `lark-cli` commands unless the operation explicitly requires user identity.
+> **Default rule**: Always use `--as bot` for ALL `lark-cli` commands unless the operation explicitly requires user identity (e.g. searching contacts by name, reading personal calendar, searching group chats you're a member of).
+>
+> **This is a hard rule — never omit `--as bot` on any `lark-cli` command.**
 
 ---
 
@@ -134,20 +136,49 @@ lark-cli auth login --device-code <device_code_from_previous_output>
 
 ## Step 7 — Install Skills (AI Agent Integration)
 
-Skills teach the AI agent how to use Lark CLI effectively. Install all available skills:
+Skills teach the AI agent Lark API patterns, command syntax, and best practices for each Lark module. **This step is required for the AI agent to operate Lark CLI correctly.**
+
+Install all available skills:
 
 ```bash
 npx skills install lark-cli -g
 ```
+
+This installs skills for all Lark modules: `lark-im`, `lark-doc`, `lark-base`, `lark-calendar`, `lark-drive`, `lark-sheets`, `lark-wiki`, `lark-task`, `lark-mail`, `lark-vc`, `lark-okr`, `lark-approval`, `lark-contact`, `lark-whiteboard`, `lark-slides`, `lark-minutes`, `lark-attendance`, `lark-event`, and more.
 
 Verify skills are installed:
 ```bash
 npx skills list
 ```
 
+You should see a list of `lark-*` skills. If any are missing, re-run the install command.
+
 ---
 
-## Step 8 — Verify Full Setup
+## Step 8 — Write Global Agent Rules
+
+Create a global `AGENTS.md` so these rules apply to every session automatically:
+
+```bash
+mkdir -p ~/.opencode
+cat >> ~/.opencode/AGENTS.md << 'EOF'
+
+## Lark CLI
+
+- Always use `--as bot` for every `lark-cli` command by default.
+- Only switch to `--as user` when the operation explicitly requires user identity (e.g. `+search-user`, personal calendar, group chat search).
+- Never omit the `--as` flag on any `lark-cli` command.
+EOF
+```
+
+Verify it was written:
+```bash
+cat ~/.opencode/AGENTS.md
+```
+
+---
+
+## Step 9 — Verify Full Setup
 
 Run these checks to confirm everything is working:
 
@@ -160,6 +191,9 @@ lark-cli auth status
 
 # List installed skills
 npx skills list
+
+# Confirm global agent rules
+cat ~/.opencode/AGENTS.md
 ```
 
 If all commands succeed, setup is complete. ✅
@@ -181,10 +215,10 @@ If all commands succeed, setup is complete. ✅
 ## Quick Reference
 
 ```bash
-# Always use bot by default
+# ALWAYS use --as bot by default (hard rule)
 lark-cli <command> --as bot
 
-# Switch to user identity when needed
+# Only use --as user when explicitly required
 lark-cli <command> --as user
 
 # Check current auth status
@@ -192,4 +226,7 @@ lark-cli auth status
 
 # Update lark-cli to latest
 lark-cli update
+
+# Update all skills
+npx skills install lark-cli -g
 ```
